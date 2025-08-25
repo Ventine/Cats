@@ -4,6 +4,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.cats.Proyect_Cats.service.WeatherService;
+import com.cats.Proyect_Cats.service.JokesService;
+import com.cats.Proyect_Cats.service.CatFactsService;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -15,9 +17,13 @@ import java.util.Map;
 public class HealthController {
 
     private final WeatherService weatherService;
+    private final CatFactsService catFactsService;
+    private final JokesService jokesService;
 
-    public HealthController(WeatherService weatherService) {
+    public HealthController(WeatherService weatherService, CatFactsService catFactsService, JokesService jokesService) {
         this.weatherService = weatherService;
+        this.catFactsService = catFactsService;
+        this.jokesService = jokesService;
     }
 
     @GetMapping("/health")
@@ -42,6 +48,16 @@ public class HealthController {
         Map<String, Object> weatherData = weatherService.getWeather(city);
         System.out.println("[DEBUG] Datos finales construidos: " + weatherData);
         return weatherData;
+    }
+
+    @GetMapping("/catfact")
+    public Map<String, Object> getCatFact() {
+        return Map.of("fact", catFactsService.getRandomFact());
+    }
+
+    @GetMapping("/joke")
+    public Map<String, Object> getJoke() {
+        return Map.of("joke", jokesService.getRandomJoke());
     }
 
 }
