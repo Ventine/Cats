@@ -1,17 +1,20 @@
 package com.cats.Proyect_Cats.controller;
 
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RestController;
-import com.cats.Proyect_Cats.service.WeatherService;
-import com.cats.Proyect_Cats.service.JokesService;
-import com.cats.Proyect_Cats.service.CatFactsService;
-
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
+
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.cats.Proyect_Cats.service.CatFactsService;
+import com.cats.Proyect_Cats.service.JokesService;
+import com.cats.Proyect_Cats.service.SystemInfoService;
+import com.cats.Proyect_Cats.service.SystemInfoServiceMax;
+import com.cats.Proyect_Cats.service.WeatherService;
 
 @RestController
 public class HealthController {
@@ -19,11 +22,17 @@ public class HealthController {
     private final WeatherService weatherService;
     private final CatFactsService catFactsService;
     private final JokesService jokesService;
+    private final SystemInfoService systemInfoService;
+    private final SystemInfoServiceMax systemInfoServiceMax;
 
-    public HealthController(WeatherService weatherService, CatFactsService catFactsService, JokesService jokesService) {
+    public HealthController(WeatherService weatherService, CatFactsService catFactsService, 
+    JokesService jokesService, SystemInfoService systemInfoService, SystemInfoServiceMax systemInfoServiceMax) {
         this.weatherService = weatherService;
         this.catFactsService = catFactsService;
         this.jokesService = jokesService;
+        this.systemInfoService = systemInfoService;
+         this.systemInfoServiceMax = systemInfoServiceMax;
+
     }
 
     @GetMapping("/health")
@@ -58,6 +67,16 @@ public class HealthController {
     @GetMapping("/joke")
     public Map<String, Object> getJoke() {
         return Map.of("joke", jokesService.getRandomJoke());
+    }
+
+    @GetMapping("/systemInfo")
+    public Map<String, Object> getSystemInfo() {
+        return systemInfoService.getSystemInfo();
+    }
+
+    @GetMapping("/systemInfoMax")
+    public Map<String, Object> getSystemInfoMax() {
+        return systemInfoServiceMax.getSystemInfo();
     }
 
 }
