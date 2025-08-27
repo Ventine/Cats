@@ -6,6 +6,8 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
@@ -15,6 +17,11 @@ import com.cats.Proyect_Cats.service.JokesService;
 import com.cats.Proyect_Cats.service.SystemInfoService;
 import com.cats.Proyect_Cats.service.SystemInfoServiceMax;
 import com.cats.Proyect_Cats.service.WeatherService;
+import com.cats.Proyect_Cats.service.TranslationService;
+
+import com.cats.Proyect_Cats.DTO.WordResponse;
+import com.cats.Proyect_Cats.exception.DictionaryException;
+import com.cats.Proyect_Cats.exception.TranslationException;
 
 @RestController
 public class HealthController {
@@ -24,14 +31,17 @@ public class HealthController {
     private final JokesService jokesService;
     private final SystemInfoService systemInfoService;
     private final SystemInfoServiceMax systemInfoServiceMax;
+    private final TranslationService translationService;
 
     public HealthController(WeatherService weatherService, CatFactsService catFactsService, 
-    JokesService jokesService, SystemInfoService systemInfoService, SystemInfoServiceMax systemInfoServiceMax) {
+    JokesService jokesService, SystemInfoService systemInfoService, SystemInfoServiceMax systemInfoServiceMax,
+    TranslationService translationService) {
         this.weatherService = weatherService;
         this.catFactsService = catFactsService;
         this.jokesService = jokesService;
         this.systemInfoService = systemInfoService;
-         this.systemInfoServiceMax = systemInfoServiceMax;
+        this.systemInfoServiceMax = systemInfoServiceMax;
+        this.translationService = translationService;
 
     }
 
@@ -77,6 +87,32 @@ public class HealthController {
     @GetMapping("/systemInfoMax")
     public Map<String, Object> getSystemInfoMax() {
         return systemInfoServiceMax.getSystemInfo();
+    }
+
+    @GetMapping(value = "/translate/{word}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> translateWord(@PathVariable String word) {
+        try {
+            WordResponse response = translationService.translateWord(word);
+            return ResponseEntity.ok(response);
+
+        } catch (TranslationException e) {
+            return ResponseEntity.status(502).body(Map.of(
+                "error", "Servicio de traducción no disponible",
+                "message", e.getMessage()
+            ));
+
+        } catch (DictionaryException e) {
+            return ResponseEntity.status(404).body(Map.of(
+                "error", "No se encontró información en el diccionario",
+                "message", e.getMessage()
+            ));
+
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of(
+                "error", "Error interno del servidor",
+                "message", e.getMessage()
+            ));
+        }
     }
 
 }
