@@ -20,7 +20,11 @@ public class TranslationService {
     private final RestTemplate restTemplate = new RestTemplate();
 
     public WordResponse translateWord(String word) {
+        System.out.println("[DEBUG] Palabra recibida para traducir: " + word);
+
         String translated = translate(word);
+        System.out.println("[DEBUG] Traducción obtenida: " + translated);
+
         if (translated == null) {
             throw new TranslationException("No se pudo traducir la palabra: " + word);
         }
@@ -30,18 +34,28 @@ public class TranslationService {
 
         try {
             String dictUrl = "https://api.dictionaryapi.dev/api/v2/entries/en/" + translated;
+            System.out.println("[DEBUG] URL diccionario: " + dictUrl);
+
             ResponseEntity<List> dictResp = restTemplate.getForEntity(dictUrl, List.class);
             List<?> body = dictResp.getBody();
+            System.out.println("[DEBUG] Respuesta diccionario: " + body);
+
             if (body != null && !body.isEmpty()) {
                 Map<?, ?> entry = (Map<?, ?>) body.get(0);
                 pronunciation = extractPronunciation(entry);
+                System.out.println("[DEBUG] Pronunciación extraída: " + pronunciation);
+
                 example = extractExample(entry);
+                System.out.println("[DEBUG] Ejemplo extraído: " + example);
             }
         } catch (Exception e) {
+            System.out.println("[ERROR] Fallo al obtener datos del diccionario: " + e.getMessage());
             throw new DictionaryException("No se pudo obtener información del diccionario para: " + translated, e);
         }
 
-        return new WordResponse(word, translated, pronunciation, example);
+        WordResponse response = new WordResponse(word, translated, pronunciation, example);
+        System.out.println("[DEBUG] Respuesta final construida: " + response);
+        return response;
     }
 
     private String translate(String word) {
@@ -51,10 +65,14 @@ public class TranslationService {
         );
         HttpEntity<Map<String, Object>> entity = new HttpEntity<>(request, createJsonHeaders());
 
+        System.out.println("[DEBUG] Request de traducción: " + request);
+
         try {
             Map<String, Object> resp = restTemplate.postForObject(translateUrl, entity, Map.class);
+            System.out.println("[DEBUG] Respuesta de servicio de traducción: " + resp);
             return resp != null ? (String) resp.get("translatedText") : null;
         } catch (Exception e) {
+            System.out.println("[ERROR] Fallo en servicio de traducción: " + e.getMessage());
             throw new TranslationException("Error llamando al servicio de traducción", e);
         }
     }
