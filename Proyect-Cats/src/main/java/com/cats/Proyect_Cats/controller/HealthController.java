@@ -14,11 +14,15 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.cats.Proyect_Cats.service.CatFactsService;
 import com.cats.Proyect_Cats.service.JokesService;
+import com.cats.Proyect_Cats.service.PokemonService;
 import com.cats.Proyect_Cats.service.SystemInfoService;
 import com.cats.Proyect_Cats.service.SystemInfoServiceMax;
 import com.cats.Proyect_Cats.service.WeatherService;
-import com.cats.Proyect_Cats.service.TranslationService;
 
+import reactor.core.publisher.Mono;
+
+import com.cats.Proyect_Cats.service.TranslationService;
+import com.cats.Proyect_Cats.DTO.PokemonResponse;
 import com.cats.Proyect_Cats.DTO.WordResponse;
 import com.cats.Proyect_Cats.exception.DictionaryException;
 import com.cats.Proyect_Cats.exception.TranslationException;
@@ -32,17 +36,18 @@ public class HealthController {
     private final SystemInfoService systemInfoService;
     private final SystemInfoServiceMax systemInfoServiceMax;
     private final TranslationService translationService;
+    private final PokemonService pokeservice;
 
     public HealthController(WeatherService weatherService, CatFactsService catFactsService, 
     JokesService jokesService, SystemInfoService systemInfoService, SystemInfoServiceMax systemInfoServiceMax,
-    TranslationService translationService) {
+    TranslationService translationService, PokemonService pokeservice) {
         this.weatherService = weatherService;
         this.catFactsService = catFactsService;
         this.jokesService = jokesService;
         this.systemInfoService = systemInfoService;
         this.systemInfoServiceMax = systemInfoServiceMax;
         this.translationService = translationService;
-
+        this.pokeservice = pokeservice;
     }
 
     @GetMapping("/health")
@@ -120,6 +125,13 @@ public class HealthController {
                 "message", e.getMessage()
             ));
         }
+    }
+
+    @GetMapping("PokeDex/{name}")
+    public Mono<ResponseEntity<PokemonResponse>> getPokemon(@PathVariable String name) {
+        return pokeservice.getPokemon(name)
+                .map(ResponseEntity::ok)
+                .onErrorResume(e -> Mono.just(ResponseEntity.badRequest().build()));
     }
 
 }
