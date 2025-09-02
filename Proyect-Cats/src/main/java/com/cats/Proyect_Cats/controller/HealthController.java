@@ -10,9 +10,11 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.cats.Proyect_Cats.service.CatFactsService;
+import com.cats.Proyect_Cats.service.GeoService;
 import com.cats.Proyect_Cats.service.JokesService;
 import com.cats.Proyect_Cats.service.PokemonService;
 import com.cats.Proyect_Cats.service.SystemInfoService;
@@ -22,6 +24,7 @@ import com.cats.Proyect_Cats.service.WeatherService;
 import reactor.core.publisher.Mono;
 
 import com.cats.Proyect_Cats.service.TranslationService;
+import com.cats.Proyect_Cats.DTO.LocationResponse;
 import com.cats.Proyect_Cats.DTO.PokemonResponse;
 import com.cats.Proyect_Cats.DTO.WordResponse;
 import com.cats.Proyect_Cats.exception.DictionaryException;
@@ -37,10 +40,11 @@ public class HealthController {
     private final SystemInfoServiceMax systemInfoServiceMax;
     private final TranslationService translationService;
     private final PokemonService pokeservice;
+    private final GeoService geoService;
 
     public HealthController(WeatherService weatherService, CatFactsService catFactsService, 
     JokesService jokesService, SystemInfoService systemInfoService, SystemInfoServiceMax systemInfoServiceMax,
-    TranslationService translationService, PokemonService pokeservice) {
+    TranslationService translationService, PokemonService pokeservice, GeoService geoService) {
         this.weatherService = weatherService;
         this.catFactsService = catFactsService;
         this.jokesService = jokesService;
@@ -48,6 +52,7 @@ public class HealthController {
         this.systemInfoServiceMax = systemInfoServiceMax;
         this.translationService = translationService;
         this.pokeservice = pokeservice;
+        this.geoService = geoService;
     }
 
     @GetMapping("/health")
@@ -132,6 +137,13 @@ public class HealthController {
         return pokeservice.getPokemon(name)
                 .map(ResponseEntity::ok)
                 .onErrorResume(e -> Mono.just(ResponseEntity.badRequest().build()));
+    }
+
+    @GetMapping("/geo")
+    public LocationResponse reverseGeocode(
+            @RequestParam double lat,
+            @RequestParam double lon) {
+        return geoService.getLocation(lat, lon);
     }
 
 }
