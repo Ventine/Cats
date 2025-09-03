@@ -99,7 +99,7 @@ public class HealthController {
         return systemInfoServiceMax.getSystemInfo();
     }
 
-    @GetMapping(value = "/translate/{word}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/dictionaryEnglish/{word}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> translateWord(@PathVariable String word) {
         System.out.println("[DEBUG] Petición recibida en /translate con palabra: " + word);
 
@@ -107,13 +107,6 @@ public class HealthController {
             WordResponse response = translationService.translateWord(word);
             System.out.println("[DEBUG] Respuesta generada correctamente: " + response);
             return ResponseEntity.ok(response);
-
-        } catch (TranslationException e) {
-            System.out.println("[ERROR] Fallo en traducción: " + e.getMessage());
-            return ResponseEntity.status(502).body(Map.of(
-                "error", "Servicio de traducción no disponible",
-                "message", e.getMessage()
-            ));
 
         } catch (DictionaryException e) {
             System.out.println("[ERROR] Fallo en diccionario: " + e.getMessage());
@@ -124,7 +117,7 @@ public class HealthController {
 
         } catch (Exception e) {
             System.out.println("[ERROR] Error inesperado: " + e.getMessage());
-            e.printStackTrace(); // para ver el stack completo en consola
+            e.printStackTrace();
             return ResponseEntity.status(500).body(Map.of(
                 "error", "Error interno del servidor",
                 "message", e.getMessage()
