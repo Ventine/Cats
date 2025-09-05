@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,11 +25,12 @@ import com.cats.Proyect_Cats.service.WeatherService;
 import reactor.core.publisher.Mono;
 
 import com.cats.Proyect_Cats.service.TranslationService;
+import com.cats.Proyect_Cats.DTO.BoredActivityResponse;
 import com.cats.Proyect_Cats.DTO.LocationResponse;
 import com.cats.Proyect_Cats.DTO.PokemonResponse;
 import com.cats.Proyect_Cats.DTO.WordResponse;
+import com.cats.Proyect_Cats.exception.BoredApiService;
 import com.cats.Proyect_Cats.exception.DictionaryException;
-import com.cats.Proyect_Cats.exception.TranslationException;
 
 @RestController
 public class HealthController {
@@ -41,10 +43,12 @@ public class HealthController {
     private final TranslationService translationService;
     private final PokemonService pokeservice;
     private final GeoService geoService;
+    private final BoredApiService boredApiService;
 
     public HealthController(WeatherService weatherService, CatFactsService catFactsService, 
     JokesService jokesService, SystemInfoService systemInfoService, SystemInfoServiceMax systemInfoServiceMax,
-    TranslationService translationService, PokemonService pokeservice, GeoService geoService) {
+    TranslationService translationService, PokemonService pokeservice, GeoService geoService,
+    BoredApiService boredApiService) {
         this.weatherService = weatherService;
         this.catFactsService = catFactsService;
         this.jokesService = jokesService;
@@ -53,6 +57,7 @@ public class HealthController {
         this.translationService = translationService;
         this.pokeservice = pokeservice;
         this.geoService = geoService;
+        this.boredApiService = boredApiService;
     }
 
     @GetMapping("/health")
@@ -137,6 +142,22 @@ public class HealthController {
             @RequestParam double lat,
             @RequestParam double lon) {
         return geoService.getLocation(lat, lon);
+    }
+
+     @GetMapping("/activity")
+    public ResponseEntity<?> getRandomActivity() {
+        try {
+            // Llamamos al servicio que consume la API
+            BoredActivityResponse response = boredApiService.fetchActivity();
+            return ResponseEntity.ok(response);
+        } catch (Exception ex) {
+            // Si algo falla, devolvemos un error controlado
+            return ResponseEntity.status(HttpStatus.BAD_GATEWAY)
+                    .body(Map.of(
+                            "error", "No se pudo obtener la actividad",
+                            "detalle", ex.getMessage()
+                    ));
+        }
     }
 
 }
