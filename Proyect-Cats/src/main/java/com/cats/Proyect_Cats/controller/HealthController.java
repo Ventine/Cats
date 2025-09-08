@@ -4,6 +4,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.http.HttpStatus;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.cats.Proyect_Cats.service.CatFactsService;
+import com.cats.Proyect_Cats.service.CryptoService;
 import com.cats.Proyect_Cats.service.GeoService;
 import com.cats.Proyect_Cats.service.JokesService;
 import com.cats.Proyect_Cats.service.PokemonService;
@@ -26,6 +28,7 @@ import reactor.core.publisher.Mono;
 
 import com.cats.Proyect_Cats.service.TranslationService;
 import com.cats.Proyect_Cats.DTO.BoredActivityResponse;
+import com.cats.Proyect_Cats.DTO.CryptoResponseDto;
 import com.cats.Proyect_Cats.DTO.LocationResponse;
 import com.cats.Proyect_Cats.DTO.PokemonResponse;
 import com.cats.Proyect_Cats.DTO.WordResponse;
@@ -44,11 +47,12 @@ public class HealthController {
     private final PokemonService pokeservice;
     private final GeoService geoService;
     private final BoredApiService boredApiService;
+    private final CryptoService  cryptoService ;
 
     public HealthController(WeatherService weatherService, CatFactsService catFactsService, 
     JokesService jokesService, SystemInfoService systemInfoService, SystemInfoServiceMax systemInfoServiceMax,
     TranslationService translationService, PokemonService pokeservice, GeoService geoService,
-    BoredApiService boredApiService) {
+    BoredApiService boredApiService, CryptoService cryptoService) {
         this.weatherService = weatherService;
         this.catFactsService = catFactsService;
         this.jokesService = jokesService;
@@ -58,6 +62,7 @@ public class HealthController {
         this.pokeservice = pokeservice;
         this.geoService = geoService;
         this.boredApiService = boredApiService;
+        this.cryptoService = cryptoService;
     }
 
     @GetMapping("/health")
@@ -158,6 +163,11 @@ public class HealthController {
                             "detalle", ex.getMessage()
                     ));
         }
+    }
+
+    @GetMapping("/crypto")
+    public List<CryptoResponseDto> getCryptos() {
+        return cryptoService.getTopCryptos();
     }
 
 }
