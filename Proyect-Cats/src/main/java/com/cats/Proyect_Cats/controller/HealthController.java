@@ -82,31 +82,69 @@ public class HealthController {
     }
 
     @GetMapping("/weather/{city}")
-    public Map<String, Object> getWeather(@PathVariable String city) {
-        System.out.println("[DEBUG] Llamada recibida para ciudad: " + city);
-        Map<String, Object> weatherData = weatherService.getWeather(city);
-        System.out.println("[DEBUG] Datos finales construidos: " + weatherData);
-        return weatherData;
+    public ResponseEntity<Map<String, Object>> getWeather(@PathVariable String city) {
+        try {
+            System.out.println("[DEBUG] Llamada recibida para ciudad: " + city);
+            Map<String, Object> weatherData = weatherService.getWeather(city);
+
+            if (weatherData == null || weatherData.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(Map.of("error", "No se encontraron datos para la ciudad: " + city));
+            }
+
+            System.out.println("[DEBUG] Datos finales construidos: " + weatherData);
+            return ResponseEntity.ok(weatherData);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Error al obtener el clima", "details", e.getMessage()));
+        }
     }
 
     @GetMapping("/catfact")
-    public Map<String, Object> getCatFact() {
-        return Map.of("fact", catFactsService.getRandomFact());
+    public ResponseEntity<Map<String, Object>> getCatFact() {
+        try {
+            String fact = catFactsService.getRandomFact();
+            return ResponseEntity.ok(Map.of("fact", fact));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Error al obtener cat fact", "details", e.getMessage()));
+        }
     }
 
     @GetMapping("/joke")
-    public Map<String, Object> getJoke() {
-        return Map.of("joke", jokesService.getRandomJoke());
+    public ResponseEntity<Map<String, Object>> getJoke() {
+        try {
+            String joke = jokesService.getRandomJoke();
+            return ResponseEntity.ok(Map.of("joke", joke));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Error al obtener chiste", "details", e.getMessage()));
+        }
     }
 
     @GetMapping("/systemInfo")
-    public Map<String, Object> getSystemInfo() {
-        return systemInfoService.getSystemInfo();
+    public ResponseEntity<Map<String, Object>> getSystemInfo() {
+        try {
+            return ResponseEntity.ok(systemInfoService.getSystemInfo());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Error al obtener información del sistema", "details", e.getMessage()));
+        }
     }
 
     @GetMapping("/systemInfoMax")
-    public Map<String, Object> getSystemInfoMax() {
-        return systemInfoServiceMax.getSystemInfo();
+    public ResponseEntity<Map<String, Object>> getSystemInfoMax() {
+        try {
+            return ResponseEntity.ok(systemInfoServiceMax.getSystemInfo());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Error al obtener información del sistema (Max)", "details", e.getMessage()));
+        }
     }
 
     @GetMapping(value = "/dictionaryEnglish/{word}", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -143,10 +181,34 @@ public class HealthController {
     }
 
     @GetMapping("/geo")
-    public LocationResponse reverseGeocode(
+    public ResponseEntity<?> reverseGeocode(
             @RequestParam double lat,
             @RequestParam double lon) {
-        return geoService.getLocation(lat, lon);
+
+        try {
+            // Validación básica de coordenadas
+            if (lat < -90 || lat > 90 || lon < -180 || lon > 180) {
+                return ResponseEntity.badRequest()
+                        .body(Map.of("error", "Coordenadas inválidas",
+                                    "details", "Latitud debe estar entre -90 y 90, longitud entre -180 y 180"));
+            }
+
+            LocationResponse location = geoService.getLocation(lat, lon);
+
+            if (location == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(Map.of("error", "No se pudo determinar la ubicación",
+                                    "details", "Revisa las coordenadas proporcionadas"));
+            }
+
+            return ResponseEntity.ok(location);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Error al obtener la ubicación",
+                                "details", e.getMessage()));
+        }
     }
 
      @GetMapping("/activity")
@@ -166,8 +228,24 @@ public class HealthController {
     }
 
     @GetMapping("/crypto")
-    public List<CryptoResponseDto> getCryptos() {
-        return cryptoService.getTopCryptos();
+    public ResponseEntity<?> getCryptos() {
+        try {
+            List<CryptoResponseDto> cryptos = cryptoService.getTopCryptos();
+
+            if (cryptos == null || cryptos.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(Map.of("error", "No se encontraron criptomonedas"));
+            }
+
+            return ResponseEntity.ok(cryptos);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Error al obtener criptomonedas", 
+                                "details", e.getMessage()));
+        }
     }
+
 
 }
