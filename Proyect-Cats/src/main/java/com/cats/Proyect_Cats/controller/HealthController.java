@@ -84,7 +84,6 @@ public class HealthController {
     @GetMapping("/weather/{city}")
     public ResponseEntity<Map<String, Object>> getWeather(@PathVariable String city) {
         try {
-            System.out.println("[DEBUG] Llamada recibida para ciudad: " + city);
             Map<String, Object> weatherData = weatherService.getWeather(city);
 
             if (weatherData == null || weatherData.isEmpty()) {
@@ -92,7 +91,6 @@ public class HealthController {
                         .body(Map.of("error", "No se encontraron datos para la ciudad: " + city));
             }
 
-            System.out.println("[DEBUG] Datos finales construidos: " + weatherData);
             return ResponseEntity.ok(weatherData);
         } catch (Exception e) {
             e.printStackTrace();
@@ -149,22 +147,17 @@ public class HealthController {
 
     @GetMapping(value = "/dictionaryEnglish/{word}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> translateWord(@PathVariable String word) {
-        System.out.println("[DEBUG] Petición recibida en /translate con palabra: " + word);
-
         try {
             WordResponse response = translationService.translateWord(word);
-            System.out.println("[DEBUG] Respuesta generada correctamente: " + response);
             return ResponseEntity.ok(response);
 
         } catch (DictionaryException e) {
-            System.out.println("[ERROR] Fallo en diccionario: " + e.getMessage());
             return ResponseEntity.status(404).body(Map.of(
                 "error", "No se encontró información en el diccionario",
                 "message", e.getMessage()
             ));
 
         } catch (Exception e) {
-            System.out.println("[ERROR] Error inesperado: " + e.getMessage());
             e.printStackTrace();
             return ResponseEntity.status(500).body(Map.of(
                 "error", "Error interno del servidor",

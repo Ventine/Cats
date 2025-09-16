@@ -16,15 +16,12 @@ public class TranslationService {
     private final RestTemplate restTemplate = new RestTemplate();
 
     public WordResponse translateWord(String word) {
-        System.out.println("[DEBUG] Palabra recibida para diccionario: " + word);
 
         try {
             String dictUrl = "https://api.dictionaryapi.dev/api/v2/entries/en/" + word;
-            System.out.println("[DEBUG] URL diccionario: " + dictUrl);
 
             ResponseEntity<List> dictResp = restTemplate.getForEntity(dictUrl, List.class);
             List<?> body = dictResp.getBody();
-            System.out.println("[DEBUG] Respuesta diccionario: " + body);
 
             if (body == null || body.isEmpty()) {
                 throw new DictionaryException("No se encontró información en el diccionario para: " + word);
@@ -39,7 +36,6 @@ public class TranslationService {
             String partOfSpeech = extractPartOfSpeech(entry);
 
             WordResponse response = new WordResponse(word, pronunciation, audio, definition, example, partOfSpeech);
-            System.out.println("[DEBUG] Respuesta final construida: " + response);
             return response;
 
         } catch (Exception e) {

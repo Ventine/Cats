@@ -24,10 +24,8 @@ public class WeatherService {
         RestTemplate restTemplate = new RestTemplate();
 
         String url = String.format(BASE_URL, city, apiKey);
-        System.out.println("[DEBUG] URL construida: " + url);
 
         Map<String, Object> apiResponse = restTemplate.getForObject(url, Map.class);
-        System.out.println("[DEBUG] Respuesta cruda del API: " + apiResponse);
 
         Map<String, Object> response = new HashMap<>();
 
@@ -59,7 +57,6 @@ public class WeatherService {
             }
         }
 
-        System.out.println("[DEBUG] Datos procesados: " + response);
         return response;
     }
 }
