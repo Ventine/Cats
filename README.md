@@ -43,6 +43,6 @@ Siéntete libre de curiosear, usar, criticar o simplemente decir *“ah bueno”
 ---
 
 <p align="center">
-  <em>Más microservicios, más caos... pero bien organizado 😉</em><br/><br/>
+  <em> 😉</em><br/><br/>
   <strong>— Ventine ⚡</strong>
 </p>
