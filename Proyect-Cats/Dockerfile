@@ -1,15 +1,29 @@
+# ===============================
 # Etapa 1: Construcción con Maven
+# ===============================
 FROM maven:3.9.6-eclipse-temurin-17 AS build
 WORKDIR /app
-COPY . .
+
+# Copiar solo archivos de dependencias primero (para cacheo eficiente)
+COPY pom.xml .
+RUN mvn dependency:go-offline
+
+# Ahora sí copiamos el código
+COPY src ./src
+
+# Compilamos y empaquetamos (sin tests para velocidad)
 RUN mvn clean package -DskipTests
 
-# Etapa 2: Imagen final más ligera con JDK
-FROM eclipse-temurin:17-jdk
+# ===============================
+# Etapa 2: Imagen final liviana
+# ===============================
+FROM eclipse-temurin:17-jdk-jammy
 WORKDIR /app
-COPY --from=build /app/target/Proyect-Cats-0.0.1-SNAPSHOT.jar app.jar
 
-# Exponer puerto de Spring Boot
+# Copiamos el jar resultante (forzamos un nombre fijo con finalName en pom.xml o lo dejamos dinámico)
+COPY --from=build /app/target/*.jar app.jar
+
+# Exponemos el puerto usado por Spring Boot
 EXPOSE 8080
 
 # Comando de inicio
